@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 
 
-___version__ = '0.0.1'
+___version__ = '0.0.2'
 
 setup(name='mom',
       version=___version__,
