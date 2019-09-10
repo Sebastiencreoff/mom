@@ -6,7 +6,7 @@ import mock
 import mom
 
 
-class TestClass(mom.Model):
+class ExampleClass(mom.Model):
 
     JSON_SCHEMA = {
         '$schema': 'http://json-schema.org/schema#',
@@ -27,9 +27,6 @@ class TestClass(mom.Model):
         self.value_str = None
         super().__init__(data=data)
 
-    def id(self):
-        return self._id
-
     def to_dict(self):
         result = super().to_dict()
         result.update({
@@ -49,28 +46,28 @@ def test_init():
     mom.Model.session = mock.MagicMock()
 
     # Test without data
-    obj = TestClass()
+    obj = ExampleClass()
 
     assert mom.Model.session.add.call_count == 1
     assert mom.Model.session.update.call_count == 0
 
-    assert not obj.readOnly
-    assert obj._id
+    assert not obj.read_only
+    assert obj.id()
 
     # Test with data
     mom.Model.session.reset_mock()
 
-    obj2 = TestClass(data=obj.to_dict())
+    obj2 = ExampleClass(data=obj.to_dict())
     assert mom.Model.session.add.call_count == 0
     assert mom.Model.session.update.call_count == 0
 
-    assert obj2.readOnly
-    assert obj2._id == obj._id
+    assert obj2.read_only
+    assert obj2.id() == obj.id()
 
 
 def test_single_attr():
     mom.Model.session = mock.MagicMock()
-    obj = TestClass()
+    obj = ExampleClass()
 
     mom.Model.session.reset_mock()
     # Update one parameter.
@@ -81,7 +78,7 @@ def test_single_attr():
 
 def test_method():
     mom.Model.session = mock.MagicMock()
-    obj = TestClass()
+    obj = ExampleClass()
 
     mom.Model.session.reset_mock()
 

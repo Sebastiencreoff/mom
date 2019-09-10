@@ -19,10 +19,10 @@ class Session(object):
         if not hasattr(obj, 'id'):
             raise AttributeError(f'{obj} must have id attribute')
 
-        if not hasattr(obj, 'readOnly'):
-            raise AttributeError(f'{obj} must have readOnly attribute')
+        if not hasattr(obj, 'read_only'):
+            raise AttributeError(f'{obj} must have read_only attribute')
 
-        if not obj.readOnly:
+        if not obj.read_only:
             print(f'add: add {obj.id()}')
             if not self._insert.get(Session.collection(obj)):
                 self._insert[Session.collection(obj)] = {}
@@ -33,8 +33,8 @@ class Session(object):
         if not hasattr(obj, 'id'):
             raise AttributeError(f'{obj} must have id attribute')
 
-        if not hasattr(obj, 'readOnly'):
-            raise AttributeError(f'{obj} must have readOnly attribute')
+        if not hasattr(obj, 'read_only'):
+            raise AttributeError(f'{obj} must have read_only attribute')
 
         if not hasattr(obj, 'update'):
             raise AttributeError(f'{obj} must have update attribute')
@@ -43,7 +43,7 @@ class Session(object):
             self._insert[Session.collection(obj)] = {}
         inserts = self._insert.get(Session.collection(obj))
 
-        if not obj.readOnly and not obj.update:
+        if not obj.read_only and not obj.update:
             print(f'update: insert {obj.id()}')
             inserts[obj.id()] = obj
 
@@ -51,7 +51,7 @@ class Session(object):
             print(f'update: insert {obj.id()}')
             inserts[obj.id()] = obj
 
-        elif obj.update and obj.readOnly:
+        elif obj.update and obj.read_only:
             print(f'update: update {obj.id()}')
             if not self._update.get(Session.collection(obj)):
                 self._update[Session.collection(obj)] = {}
@@ -61,8 +61,8 @@ class Session(object):
         if not hasattr(obj, 'id'):
             raise AttributeError(f'{obj} must have id attribute')
 
-        inserts = self._insert.get(Session.collection(obj), {})
-        updates = self._update.get(Session.collection(obj), {})
+        inserts = self._insert.get(Session.collection(obj))
+        updates = self._update.get(Session.collection(obj))
         if inserts and obj.id() in inserts:
             del inserts[obj.id()]
         elif updates and obj.id() in updates:

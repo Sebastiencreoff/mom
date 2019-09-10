@@ -15,10 +15,10 @@ class Model(object):
         self._id = str(uuid.uuid1())
 
         self.in_progress = False
-        self.readOnly = False
+        self.read_only = False
         self.update = False
         if data:
-            self.readOnly = True
+            self.read_only = True
             for k, v in utils.class_from_dict(
                     type(self).__name__, data,
                     self.JSON_SCHEMA,
@@ -26,6 +26,27 @@ class Model(object):
                 setattr(self, k, v)
 
         self.done = True
+
+    def __setattr__(self, key, value):
+        self.__dict__[key] = value
+
+        if key == 'done':
+            if not self.read_only:
+                Model.session.add(self)
+        elif hasattr(self, 'done') and not self.in_progress:
+            self.__dict__['update'] = True
+            Model.session.update(self)
+
+    def __del__(self):
+        Model.session.delete(self)
+
+    def id(self):
+        return self._id
+
+    def to_dict(self):
+        return {
+            '_id': self._id
+        }
 
     def with_update(f):
         @functools.wraps(f)
@@ -38,22 +59,3 @@ class Model(object):
             return result
 
         return wrapped
-
-    def __setattr__(self, key, value):
-        self.__dict__[key] = value
-
-        if key == 'done':
-            if not self.readOnly:
-                Model.session.add(self)
-        elif hasattr(self, 'done') and not self.in_progress:
-            self.__dict__['update'] = True
-            Model.session.update(self)
-
-    def __del__(self):
-        Model.session.delete(self)
-
-    def to_dict(self):
-        return {
-            '_id': self._id
-        }
-
