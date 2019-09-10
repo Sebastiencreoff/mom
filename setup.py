@@ -20,6 +20,7 @@ setup(name='mom',
                         'pymongo',
                         ],
       tests_require=[
+          'mock',
           'pytest',
       ],
       )

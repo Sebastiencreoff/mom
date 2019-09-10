@@ -17,15 +17,15 @@ CustomValidator = jsonschema.validators.extend(jsonschema.Draft7Validator,
 VALIDATORS = {}
 
 
-def class_from_dict(cls, data, schema, excluded_keys=None):
+def class_from_dict(cls_name, data, schema, excluded_keys=None):
     result = {k: v
               for k, v in data.items()
               if k not in excluded_keys}
     try:
-        if cls.__name__ not in VALIDATORS:
-            VALIDATORS[cls.__name__] = CustomValidator(schema=schema)
+        if cls_name not in VALIDATORS:
+            VALIDATORS[cls_name] = CustomValidator(schema=schema)
 
-        VALIDATORS[cls.__name__].validate(result)
+        VALIDATORS[cls_name].validate(result)
     except Exception as valid_err:
         print("Json Validation Error: {}".format(valid_err))
         raise valid_err

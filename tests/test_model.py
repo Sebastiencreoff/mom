@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
+import datetime
+import mock
+
 import mom
+
 
 class TestClass(mom.Model):
 
@@ -21,16 +25,18 @@ class TestClass(mom.Model):
         self.value_datetime = None
         self.value_int = value_int
         self.value_str = None
-        super().__init__(data)
+        super().__init__(data=data)
 
     def id(self):
         return self._id
 
     def to_dict(self):
-        return super().to_dict().update({
+        result = super().to_dict()
+        result.update({
             'value_datetime': self.value_datetime,
             'value_int': self.value_int,
             'value_str': self.value_str})
+        return result
 
     @mom.Model.with_update
     def updates(self, value_datetime, value_str):
@@ -40,12 +46,46 @@ class TestClass(mom.Model):
 
 
 def test_init():
-    pass
+    mom.Model.session = mock.MagicMock()
+
+    # Test without data
+    obj = TestClass()
+
+    assert mom.Model.session.add.call_count == 1
+    assert mom.Model.session.update.call_count == 0
+
+    assert not obj.readOnly
+    assert obj._id
+
+    # Test with data
+    mom.Model.session.reset_mock()
+
+    obj2 = TestClass(data=obj.to_dict())
+    assert mom.Model.session.add.call_count == 0
+    assert mom.Model.session.update.call_count == 0
+
+    assert obj2.readOnly
+    assert obj2._id == obj._id
 
 
 def test_single_attr():
-    pass
+    mom.Model.session = mock.MagicMock()
+    obj = TestClass()
+
+    mom.Model.session.reset_mock()
+    # Update one parameter.
+    obj.value_datetime = datetime.datetime.now()
+    assert mom.Model.session.add.call_count == 0
+    assert mom.Model.session.update.call_count == 1
 
 
 def test_method():
-    pass
+    mom.Model.session = mock.MagicMock()
+    obj = TestClass()
+
+    mom.Model.session.reset_mock()
+
+    # Update parameters with function.
+    obj.updates(value_datetime=datetime.datetime.now(), value_str='value')
+    assert mom.Model.session.add.call_count == 0
+    assert mom.Model.session.update.call_count == 1

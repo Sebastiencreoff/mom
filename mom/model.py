@@ -6,25 +6,24 @@ import uuid
 from . import session
 from . import utils
 
+
 class Model(object):
 
     session = session.Session()
 
     def __init__(self, data=None):
-
         self._id = str(uuid.uuid1())
+
+        self.in_progress = False
+        self.readOnly = False
+        self.update = False
         if data:
+            self.readOnly = True
             for k, v in utils.class_from_dict(
                     type(self).__name__, data,
                     self.JSON_SCHEMA,
                     self.EXCLUDED_KEYS).items():
                 setattr(self, k, v)
-
-        self.in_progress = False
-        self.readOnly = False
-        self.update = False
-        if 'data' in kwargs and kwargs['data']:
-            self.readOnly = True
 
         self.done = True
 
@@ -44,7 +43,8 @@ class Model(object):
         self.__dict__[key] = value
 
         if key == 'done':
-            Model.session.add(self)
+            if not self.readOnly:
+                Model.session.add(self)
         elif hasattr(self, 'done') and not self.in_progress:
             self.__dict__['update'] = True
             Model.session.update(self)
